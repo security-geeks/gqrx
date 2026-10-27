@@ -14,6 +14,8 @@ Gqrx can operate as an AM/FM/SSB receiver with audio output or as an FFT-only
 instrument. There are also various hooks for interacting with external
 applications using network sockets.
 
+![Screenshot of the main Gqrx window](resources/screenshots/gqrx-main.png)
+
 
 Download
 --------
@@ -21,6 +23,7 @@ Download
 Gqrx is distributed as a source code package and binaries for Linux and Mac.
 Many Linux distributions provide gqrx in their package repositories.
 Alternate Mac support is available through [MacPorts](https://ports.macports.org/port/gqrx/summary) and [Homebrew](https://formulae.brew.sh/cask/gqrx).
+Windows support is available through [radioconda](https://github.com/ryanvolz/radioconda#radioconda).
 
 * [Official releases](https://github.com/gqrx-sdr/gqrx/releases)
 * [Pre-release builds](https://github.com/gqrx-sdr/gqrx/actions?query=workflow%3ABuild+branch%3Amaster)
@@ -63,7 +66,7 @@ Getting help and reporting bugs
 -------------------------------
 
 There is a Google group for discussing anything related to Gqrx:
-https://groups.google.com/forum/#!forum/gqrx
+https://groups.google.com/g/gqrx
 This includes getting help with installation and troubleshooting. Please
 remember to provide detailed description of your problem, your setup, what
 steps you followed, etc.
@@ -79,7 +82,7 @@ Installation from source
 The source code is hosted on Github: https://github.com/gqrx-sdr/gqrx
 
 To compile gqrx from source you need the following dependencies:
-- GNU Radio 3.8 with the following components:
+- GNU Radio 3.8, 3.9, or 3.10 with the following components:
     - gnuradio-runtime
     - gnuradio-analog
     - gnuradio-audio
@@ -87,28 +90,26 @@ To compile gqrx from source you need the following dependencies:
     - gnuradio-digital
     - gnuradio-fft
     - gnuradio-filter
+    - gnuradio-network (GNU Radio 3.10 only)
     - gnuradio-pmt
 - The gr-iqbalance library (optional)
 - Drivers for the hardware you want to have support for:
-    - Funcube Dongle Pro driver via gr-fcd
     - UHD driver via gr-uhd
-    - Funcube Dongle Pro+ driver from https://github.com/dl1ksv/gr-fcdproplus
-    - RTL-SDR driver from https://git.osmocom.org/rtl-sdr
-    - OsmoSDR driver from https://git.osmocom.org/osmo-sdr
+    - FUNcube Dongle and FUNcube Dongle Pro+ driver from https://github.com/dl1ksv/gr-funcube
+    - RTL-SDR driver from https://gitea.osmocom.org/sdr/rtl-sdr
     - HackRF driver from https://github.com/mossmann/hackrf
     - Airspy driver from https://github.com/airspy/airspyone_host
     - SoapySDR from https://github.com/pothosware/SoapySDR
     - RFSpace driver is built in
-- gnuradio-osmosdr from https://git.osmocom.org/gr-osmosdr
+- gnuradio-osmosdr from https://gitea.osmocom.org/sdr/gr-osmosdr
 - pulseaudio or portaudio (Linux-only and optional)
-- Qt 5 with the following components:
+- Qt 5 or Qt 6 with the following components:
     - Core
     - GUI
     - Network
     - Widgets
     - Svg (runtime-only)
-- pkg-config
-- cmake version >= 3.2.0 if you wish to build using cmake.
+- cmake version >= 3.5.0
 
 Gqrx can be compiled from within Qt Creator or in a terminal:
 
@@ -182,6 +183,7 @@ The following people and organisations have contributed to gqrx:
 * Andy Sloane
 * Anthony Willard
 * Anton Blanchard
+* AsciiWolf
 * Bastian Bloessl
 * Ben Reese
 * Bob McGwier, N4HY
@@ -195,6 +197,9 @@ The following people and organisations have contributed to gqrx:
 * Darin Franklin
 * Davide Gerhard
 * Dominic Chen
+* Doron Behar
+* Doug Hammond
+* Edouard Lafargue
 * Elias Önal
 * Federico Fuga
 * Frank Brickle, AB2KT
@@ -204,14 +209,20 @@ The following people and organisations have contributed to gqrx:
 * Göran Weinholt, SA6CJK
 * Grigory Shipunov
 * Gwenhael Goavec-Merou
+* Herman Semenov
+* James Yuzawa
+* Jaroslav Škarvada
 * Jeff Long
 * Jiawei Chen
 * Jiří Pinkava
+* Joachim Schueth, DL2KCD
+* Jon Bergli Heier
 * Josh Blum
 * Kate Adams
 * Kenji Rikitake, JJ1BDX
 * Kitware Inc.
 * Konrad Beckmann
+* Luna Gräfje
 * luzpaz
 * Marco Savelli
 * Markus Kolb
@@ -227,11 +238,15 @@ The following people and organisations have contributed to gqrx:
 * Pavel Milanes, CO7WT
 * Pavel Stano
 * Phil Vachon
+* Radoslav Gerganov
 * Rob Frohne
 * Ron Economos, W6RZ
+* Ruslan Migirov
 * Russell Dwarshuis, KB8U
+* Ryan Volz
 * Shuyuan Liu
 * Stefano Leucci
+* Sultan Qasim Khan
 * Sylvain Munaut
 * Tarmo Tanilsoo
 * Tomasz Lemiech
@@ -239,6 +254,7 @@ The following people and organisations have contributed to gqrx:
 * Valentin Ochs
 * Vesa Solonen
 * Vincent Pelletier
+* Vladisslav P
 * Will Scales
 * Wolfgang Fritz, DK7OB
 * Youssef Touil

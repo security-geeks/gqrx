@@ -56,13 +56,19 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain(GQRX_ORG_DOMAIN);
     QCoreApplication::setApplicationName(GQRX_APP_NAME);
     QCoreApplication::setApplicationVersion(VERSION);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps, true);
+#endif
     QLoggingCategory::setFilterRules("*.debug=false");
 
     QString plugin_path = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/../soapy-modules");
     QFileInfo plugin_path_info(plugin_path);
     if (plugin_path_info.isDir())
+    {
         qputenv("SOAPY_SDR_PLUGIN_PATH", plugin_path.toUtf8());
+        qputenv("SOAPY_SDR_ROOT", "/invalid");
+        qputenv("CONDA_PREFIX", "/invalid");
+    }
 
     // setup controlport via environment variables
     // see http://lists.gnu.org/archive/html/discuss-gnuradio/2013-05/msg00270.html

@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.5)
 
 # Project name
 project(gqrx)
 set(${PROJECT_NAME}_MAJOR "2")
-set(${PROJECT_NAME}_MINOR "14")
-set(${PROJECT_NAME}_PATCH "6")
+set(${PROJECT_NAME}_MINOR "17")
+set(${PROJECT_NAME}_PATCH "7")
 set(IS_RELEASE FALSE)
 
 if(IS_RELEASE)
@@ -22,7 +22,7 @@ else()
     )
 endif()
 add_definitions(-DVERSION="${VERSION}")
-file(WRITE version.txt ${VERSION})
+file(WRITE ${CMAKE_BINARY_DIR}/version.txt ${VERSION})
 
 set(PACKAGE ${PROJECT_NAME})
 
@@ -53,10 +53,11 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_COMPILER_IS_CLANGXX)
-    add_definitions(-Wall)
-    add_definitions(-Wextra)
-    add_definitions(-Wno-unused-parameter)
-    add_definitions(-Wsign-compare)
+    add_compile_options(-Wall)
+    add_compile_options(-Wextra)
+    add_compile_options(-Wdouble-promotion)
+    add_compile_options(-Wno-unused-parameter)
+    add_compile_options(-Wsign-compare)
 endif()
 
 if(MSVC)
@@ -70,7 +71,7 @@ if(MSVC)
     add_definitions(-DBOOST_ALL_DYN_LINK)
 
     #export gr-rds symbols
-    add_definitions(-Dgnuradio_RDS_EXPORTS)
+    add_definitions(-Dgnuradio_rds_EXPORTS)
 
     if ("${MSVC_VERSION}" VERSION_LESS "1900")
         add_definitions(-D__func__=__FUNCTION__)
@@ -102,9 +103,13 @@ endfunction(add_source_files)
 
 if(APPLE AND EXISTS /usr/local/opt/qt5)
     # Homebrew installs Qt5 (up to at least 5.9.1) in
-    # /usr/local/qt5, ensure it can be found by CMake since
+    # /usr/local/opt/qt5, ensure it can be found by CMake since
     # it is not in the default /usr/local prefix.
     list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt5")
+endif()
+
+if(APPLE AND EXISTS /usr/local/opt/qt6)
+    list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/qt6")
 endif()
 
 if(APPLE AND EXISTS /usr/local/opt/icu4c/lib)
@@ -117,20 +122,30 @@ else()
 endif()
 
 # 3rd Party Dependency Stuff
-find_package(Qt5 COMPONENTS Core Network Widgets Svg REQUIRED)
+option(FORCE_QT6 "Force Qt6 to be used" OFF)
+option(FORCE_QT5 "Force Qt5 to be used" OFF)
+
+if(FORCE_QT6)
+    find_package(Qt6 REQUIRED COMPONENTS Core Network Widgets Svg SvgWidgets)
+elseif(FORCE_QT5)
+    find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Svg)
+else()
+    find_package(Qt6 QUIET COMPONENTS Core Network Widgets Svg SvgWidgets)
+    if(NOT Qt6_FOUND)
+        find_package(Qt5 REQUIRED COMPONENTS Core Network Widgets Svg)
+    endif()
+endif()
+
 include(FindPkgConfig)
 find_package(Gnuradio-osmosdr REQUIRED)
 
 set(GR_REQUIRED_COMPONENTS RUNTIME ANALOG AUDIO BLOCKS DIGITAL FILTER FFT PMT)
 find_package(Gnuradio REQUIRED COMPONENTS analog audio blocks digital filter fft network)
-if(Gnuradio_VERSION VERSION_LESS "3.8")
-    find_package(Volk)
-endif()
-
 if(NOT Gnuradio_FOUND)
     message(FATAL_ERROR "GnuRadio Runtime required to compile gqrx")
 endif()
 
+find_package(Volk)
 
 # Pass the GNU Radio version as 0xMMNNPP BCD.
 math(EXPR GNURADIO_BCD_VERSION
@@ -143,10 +158,6 @@ math(EXPR GNURADIO_BCD_VERSION
     "
 )
 add_definitions(-DGNURADIO_VERSION=${GNURADIO_BCD_VERSION})
-
-if(Gnuradio_VERSION VERSION_LESS "3.8")
-    find_package(Boost COMPONENTS system REQUIRED)
-endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
     if(NOT LINUX_AUDIO_BACKEND)
@@ -163,11 +174,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Linux|FreeBSD")
         unset(PORTAUDIO_LIBRARIES CACHE)
     elseif(${LINUX_AUDIO_BACKEND} MATCHES "Portaudio")
         message(STATUS "Portaudio backend enabled")
-        if(Gnuradio_VERSION VERSION_LESS "3.8")
-            find_package(Portaudio REQUIRED)
-        else()
-            find_package(PORTAUDIO REQUIRED)
-        endif()
+        find_package(PORTAUDIO REQUIRED)
         add_definitions(-DWITH_PORTAUDIO)
         unset(PULSEAUDIO_FOUND CACHE)
         unset(PULSEAUDIO_INCLUDE_DIR CACHE)
@@ -199,11 +206,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
     if(${OSX_AUDIO_BACKEND} MATCHES "Portaudio")
         message(STATUS "Portaudio backend enabled")
-        if(Gnuradio_VERSION VERSION_LESS "3.8")
-            find_package(Portaudio REQUIRED)
-        else()
-            find_package(PORTAUDIO REQUIRED)
-        endif()
+        find_package(PORTAUDIO REQUIRED)
         add_definitions(-DWITH_PORTAUDIO)
         unset(PULSEAUDIO_FOUND CACHE)
         unset(PULSEAUDIO_INCLUDE_DIR CACHE)
@@ -228,6 +231,13 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     endif()
 endif()
 
+find_program(CCACHE "ccache")
+if(CCACHE)
+    set(CMAKE_C_COMPILER_LAUNCHER ${CCACHE})
+    set(CMAKE_CXX_COMPILER_LAUNCHER ${CCACHE})
+    set(ENV{CCACHE_SLOPPINESS} pch_defines,time_macros)
+endif(CCACHE)
+
 
 # Airspy optimizations that require modified gr-osmosdr
 option(CUSTOM_AIRSPY_KERNELS "Enable non-standard Airspy optimizations" ON)
@@ -244,17 +254,22 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Finish configuring compiler / linker settings & flags
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
-    ${Boost_INCLUDE_DIRS}
-    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
     ${GNURADIO_OSMOSDR_INCLUDE_DIRS}
 )
 
 link_directories(
-    ${Boost_LIBRARY_DIRS}
     ${GNURADIO_RUNTIME_LIBRARY_DIRS}
     ${ICU4C_LIBRARY_DIRS}
 )
 
+# Install desktop
+install(FILES dk.gqrx.gqrx.desktop DESTINATION share/applications)
+
+# Install appstream / metainfo file
+install(FILES dk.gqrx.gqrx.appdata.xml DESTINATION share/metainfo)
+
+# Install icon
+install(FILES resources/icons/dk.gqrx.gqrx.svg DESTINATION share/icons/hicolor/scalable/apps)
 
 # Add subdirectories
 add_subdirectory(src)

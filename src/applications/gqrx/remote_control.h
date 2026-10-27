@@ -30,6 +30,7 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QtNetwork>
+#include <set>
 
 /* For gain_t and gain_list_t */
 #include "qtgui/dockinputctl.h"
@@ -92,11 +93,17 @@ public slots:
     void setMode(int mode);
     void setPassband(int passband_lo, int passband_hi);
     void setSquelchLevel(double level);
+    void setAudioGain(float gain);
+    void setAudioMuted(bool muted);
     void startAudioRecorder(QString unused);
     void stopAudioRecorder();
+    void startIqRecorder(QString unused1, QString unused2);
+    void stopIqRecorder();
     bool setGain(QString name, double gain);
     void setRDSstatus(bool enabled);
     void rdsPI(QString program_id);
+    void setRdsStation(QString name);
+    void setRdsRadiotext(QString text);
 
 signals:
     void newFrequency(qint64 freq);
@@ -105,19 +112,24 @@ signals:
     void newMode(int mode);
     void newPassband(int passband);
     void newSquelchLevel(double level);
+    void newAudioGain(float gain);
     void startAudioRecorderEvent();
     void stopAudioRecorderEvent();
+    void startIqRecorderEvent();
+    void stopIqRecorderEvent();
     void gainChanged(QString name, double value);
     void dspChanged(bool value);
     void newRDSmode(bool value);
+    void newAudioMuted(bool muted);
 
 private slots:
     void acceptConnection();
     void startRead();
+    void socketDisconnect();
 
 private:
     QTcpServer  rc_server;         /*!< The active server object. */
-    QTcpSocket* rc_socket;         /*!< The active socket object. */
+	std::set<QTcpSocket*> rc_sockets; /*!< The active socket objects. */
 
     QStringList rc_allowed_hosts;  /*!< Hosts where we accept connection from. */
     int         rc_port;           /*!< The port we are listening on. */
@@ -133,11 +145,16 @@ private:
     bool        rds_status;        /*!< RDS decoder enabled */
     float       signal_level;      /*!< Signal level in dBFS */
     double      squelch_level;     /*!< Squelch level in dBFS */
+    float       audio_gain;        /*!< Audio gain in dB */
     QString     rc_program_id;     /*!< RDS Program identification */
-    bool        audio_recorder_status; /*!< Recording enabled */
+    QString     rds_station;       /*!< RDS program service (station) name */
+    QString     rds_radiotext;     /*!< RDS Radiotext */
+    bool        audio_recorder_status; /*!< Audio recording enabled */
+    bool        iq_recorder_status;    /*!< IQ recording enabled */
     bool        receiver_running;  /*!< Whether the receiver is running or not */
     bool        hamlib_compatible;
     gain_list_t gains;             /*!< Possible and current gain settings */
+    bool        is_audio_muted;
 
     void        setNewRemoteFreq(qint64 freq);
     int         modeStrToInt(QString mode_str);

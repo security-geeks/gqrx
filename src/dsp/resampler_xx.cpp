@@ -25,9 +25,10 @@
 #include <gnuradio/filter/firdes.h>
 #include "dsp/resampler_xx.h"
 
+#define RESAMPLER_OUTPUT_MULTIPLE 4096
 
 /* Create a new instance of resampler_cc and return
- * a boost shared_ptr. This is effectively the public constructor.
+ * a shared_ptr. This is effectively the public constructor.
  */
 resampler_cc_sptr make_resampler_cc(float rate)
 {
@@ -49,14 +50,15 @@ resampler_cc::resampler_cc(float rate)
     */
 
     /* generate taps */
-    double cutoff = rate > 1.0 ? 0.4 : 0.4*rate;
-    double trans_width = rate > 1.0 ? 0.2 : 0.2*rate;
+    double cutoff = rate > 1.0f ? 0.4 : 0.4*(double)rate;
+    double trans_width = rate > 1.0f ? 0.2 : 0.2*(double)rate;
     unsigned int flt_size = 32;
 
     d_taps = gr::filter::firdes::low_pass(flt_size, flt_size, cutoff, trans_width);
 
     /* create the filter */
     d_filter = gr::filter::pfb_arb_resampler_ccf::make(rate, d_taps, flt_size);
+    d_filter->set_output_multiple(RESAMPLER_OUTPUT_MULTIPLE);
 
     /* connect filter */
     connect(self(), 0, d_filter, 0);
@@ -71,8 +73,8 @@ resampler_cc::~resampler_cc()
 void resampler_cc::set_rate(float rate)
 {
     /* generate taps */
-    double cutoff = rate > 1.0 ? 0.4 : 0.4*rate;
-    double trans_width = rate > 1.0 ? 0.2 : 0.2*rate;
+    double cutoff = rate > 1.0f ? 0.4 : 0.4*(double)rate;
+    double trans_width = rate > 1.0f ? 0.2 : 0.2*(double)rate;
     unsigned int flt_size = 32;
     d_taps = gr::filter::firdes::low_pass(flt_size, flt_size, cutoff, trans_width);
 
@@ -82,13 +84,14 @@ void resampler_cc::set_rate(float rate)
     disconnect(d_filter, 0, self(), 0);
     d_filter.reset();
     d_filter = gr::filter::pfb_arb_resampler_ccf::make(rate, d_taps, flt_size);
+    d_filter->set_output_multiple(RESAMPLER_OUTPUT_MULTIPLE);
     connect(self(), 0, d_filter, 0);
     connect(d_filter, 0, self(), 0);
     unlock();
 }
 
 /* Create a new instance of resampler_ff and return
- * a boost shared_ptr. This is effectively the public constructor.
+ * a shared_ptr. This is effectively the public constructor.
  */
 resampler_ff_sptr make_resampler_ff(float rate)
 {
@@ -110,8 +113,8 @@ resampler_ff::resampler_ff(float rate)
     */
 
     /* generate taps */
-    double cutoff = rate > 1.0 ? 0.4 : 0.4*rate;
-    double trans_width = rate > 1.0 ? 0.2 : 0.2*rate;
+    double cutoff = rate > 1.0f ? 0.4 : 0.4*(double)rate;
+    double trans_width = rate > 1.0f ? 0.2 : 0.2*(double)rate;
     unsigned int flt_size = 32;
 
     d_taps = gr::filter::firdes::low_pass(flt_size, flt_size, cutoff, trans_width);
@@ -132,8 +135,8 @@ resampler_ff::~resampler_ff()
 void resampler_ff::set_rate(float rate)
 {
     /* generate taps */
-    double cutoff = rate > 1.0 ? 0.4 : 0.4*rate;
-    double trans_width = rate > 1.0 ? 0.2 : 0.2*rate;
+    double cutoff = rate > 1.0f ? 0.4 : 0.4*(double)rate;
+    double trans_width = rate > 1.0f ? 0.2 : 0.2*(double)rate;
     unsigned int flt_size = 32;
     d_taps = gr::filter::firdes::low_pass(flt_size, flt_size, cutoff, trans_width);
 

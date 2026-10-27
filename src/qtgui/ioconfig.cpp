@@ -20,10 +20,10 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+#include <iomanip>
 #include <QDebug>
 #include <QFile>
 #include <QPushButton>
-#include <QRegExp>
 #include <QSettings>
 #include <QString>
 #include <QtGlobal>
@@ -155,7 +155,7 @@ void CIoConfig::getDeviceList(std::map<QString, QVariant> &devList)
             devlabel = "Unknown";
         }
 
-        devstr = QString(dev.to_string().c_str());
+        devstr = QString(escapeDevstr(dev.to_string()).c_str());
         devList.insert(std::pair<QString, QVariant>(devlabel, devstr));
         qDebug() << "  " << devlabel;
     }
@@ -707,7 +707,7 @@ void CIoConfig::inputDeviceSelected(int index)
  *
  * This slot is activated when the device string in the text edit box has changed
  * either by the user or programmatically. We use this to enable/disable the OK
- * button - we allo OK only if there is some text in the text entry.
+ * button - we allow OK only if there is some text in the text entry.
  */
 void CIoConfig::inputDevstrChanged(const QString &text)
 {
@@ -749,10 +749,10 @@ void CIoConfig::decimationChanged(int index)
     quad_rate = (float)input_rate / (float)decim;
     if (quad_rate > 1.e6f)
         ui->sampRateLabel->setText(QString(" %1 Msps").
-                                   arg(quad_rate * 1.e-6, 0, 'f', 3));
+                                   arg((double)quad_rate * 1.e-6, 0, 'f', 3));
     else
         ui->sampRateLabel->setText(QString(" %1 ksps").
-                                   arg(quad_rate * 1.e-3, 0, 'f', 3));
+                                   arg((double)quad_rate * 1.e-3, 0, 'f', 3));
 }
 
 /**
@@ -788,4 +788,14 @@ int CIoConfig::decim2idx(int decim) const
         ++idx;
 
     return idx;
+}
+
+/** Escape devstr to make some SoapySDR devices work when selected from drop-down */
+std::string CIoConfig::escapeDevstr(std::string devstr)
+{
+    std::stringstream ss1;
+    if (devstr.find(" ") == std::string::npos)
+        return devstr;
+    ss1 << std::quoted(devstr, '\'', '\\');
+    return ss1.str();
 }

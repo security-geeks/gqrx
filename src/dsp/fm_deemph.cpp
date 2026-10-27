@@ -27,7 +27,7 @@
 #include "dsp/fm_deemph.h"
 
 
-/* Create a new instance of fm_deemph and return a boost shared_ptr. */
+/* Create a new instance of fm_deemph and return a shared_ptr. */
 fm_deemph_sptr make_fm_deemph(float quad_rate, double tau)
 {
     return gnuradio::get_initial_sptr(new fm_deemph(quad_rate, tau));
@@ -76,7 +76,7 @@ void fm_deemph::calculate_iir_taps(double tau)
         double  w_c;    // Digital corner frequency
         double  w_ca;   // Prewarped analog corner frequency
         double  k, z1, p1, b0;
-        double  fs = d_quad_rate;
+        double  fs = (double)d_quad_rate;
 
         w_c = 1.0 / tau;
         w_ca = 2.0 * fs * tan(w_c / (2.0 * fs));

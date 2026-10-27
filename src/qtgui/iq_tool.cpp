@@ -28,7 +28,7 @@
 #include <QPalette>
 #include <QString>
 #include <QStringList>
-#include <QTime>
+#include <QScrollBar>
 
 #include <math.h>
 
@@ -47,10 +47,12 @@ CIqTool::CIqTool(QWidget *parent) :
     bytes_per_sample = 8;
     sample_rate = 192000;
     rec_len = 0;
+    center_freq = 1e8;
 
     //ui->recDirEdit->setText(QDir::currentPath());
 
     recdir = new QDir(QDir::homePath(), "*.raw");
+    recdir->setNameFilters(recdir->nameFilters() << "*.sigmf-data");
 
     error_palette = new QPalette();
     error_palette->setColor(QPalette::Text, Qt::red);
@@ -83,6 +85,7 @@ void CIqTool::setSampleRate(qint64 sr)
     }
 }
 
+
 /*! \brief Slot activated when the user selects a file. */
 void CIqTool::on_listWidget_currentTextChanged(const QString &currentText)
 {
@@ -90,10 +93,10 @@ void CIqTool::on_listWidget_currentTextChanged(const QString &currentText)
     current_file = currentText;
     QFileInfo info(*recdir, current_file);
 
-    // Get duration of selected recording and update label
-    sample_rate = sampleRateFromFileName(currentText);
+    parseFileName(currentText);
     rec_len = (int)(info.size() / (sample_rate * bytes_per_sample));
 
+    // Get duration of selected recording and update label
     refreshTimeWidgets();
 
 }
@@ -126,7 +129,7 @@ void CIqTool::on_playButton_clicked(bool checked)
             ui->listWidget->setEnabled(false);
             ui->recButton->setEnabled(false);
             emit startPlayback(recdir->absoluteFilePath(current_file),
-                               (float)sample_rate);
+                               (float)sample_rate, center_freq);
         }
     }
     else
@@ -162,7 +165,6 @@ void CIqTool::on_slider_valueChanged(int value)
     emit seek(seek_pos);
 }
 
-
 /*! \brief Start/stop recording */
 void CIqTool::on_recButton_clicked(bool checked)
 {
@@ -171,7 +173,7 @@ void CIqTool::on_recButton_clicked(bool checked)
     if (checked)
     {
         ui->playButton->setEnabled(false);
-        emit startRecording(recdir->path());
+        emit startRecording(recdir->path(), ui->formatCombo->currentText());
 
         refreshDir();
         ui->listWidget->setCurrentRow(ui->listWidget->count()-1);
@@ -181,6 +183,34 @@ void CIqTool::on_recButton_clicked(bool checked)
         ui->playButton->setEnabled(true);
         emit stopRecording();
     }
+}
+
+/*! Public slot to start IQ recording by external events (e.g. remote control).
+ *
+ * If a recording is already in progress we ignore the event.
+ */
+void CIqTool::startIqRecorder(void)
+{
+    if (ui->recButton->isChecked())
+    {
+        qDebug() << __func__ << "An IQ recording is already in progress";
+        return;
+    }
+
+    // emulate a button click
+    ui->recButton->click();
+}
+
+/*! Public slot to stop IQ recording by external events (e.g. remote control).
+ *
+ * The event is ignored if no recording is in progress.
+ */
+void CIqTool::stopIqRecorder(void)
+{
+    if (ui->recButton->isChecked())
+        ui->recButton->click(); // emulate a button click
+    else
+        qDebug() << __func__ << "No IQ recording in progress";
 }
 
 /*! \brief Cancel a recording.
@@ -233,6 +263,11 @@ void CIqTool::saveSettings(QSettings *settings)
     else
         settings->remove("baseband/rec_dir");
 
+    QString format = ui->formatCombo->currentText();
+    if (format != "Raw")
+        settings->setValue("baseband/rec_format", format);
+    else
+        settings->remove("baseband/rec_format");
 }
 
 void CIqTool::readSettings(QSettings *settings)
@@ -243,6 +278,10 @@ void CIqTool::readSettings(QSettings *settings)
     // Location of baseband recordings
     QString dir = settings->value("baseband/rec_dir", QDir::homePath()).toString();
     ui->recDirEdit->setText(dir);
+
+    // Format of baseband recordings
+    QString format = settings->value("baseband/rec_format", "Raw").toString();
+    ui->formatCombo->setCurrentText(format);
 }
 
 
@@ -276,8 +315,6 @@ void CIqTool::on_recDirButton_clicked()
         ui->recDirEdit->setText(dir);
 }
 
-
-
 void CIqTool::timeoutFunction(void)
 {
     refreshDir();
@@ -302,6 +339,8 @@ void CIqTool::timeoutFunction(void)
 void CIqTool::refreshDir()
 {
     int selection = ui->listWidget->currentRow();
+    QScrollBar * sc = ui->listWidget->verticalScrollBar();
+    int lastScroll = sc->sliderPosition();
 
     recdir->refresh();
     QStringList files = recdir->entryList();
@@ -310,6 +349,7 @@ void CIqTool::refreshDir()
     ui->listWidget->clear();
     ui->listWidget->insertItems(0, files);
     ui->listWidget->setCurrentRow(selection);
+    sc->setSliderPosition(lastScroll);
     ui->listWidget->blockSignals(false);
 
     if (is_recording)
@@ -355,22 +395,25 @@ void CIqTool::refreshTimeWidgets(void)
 }
 
 
-/*! \brief Extract sample rate from file name */
-qint64 CIqTool::sampleRateFromFileName(const QString &filename)
+/*! \brief Extract sample rate and offset frequency from file name */
+void CIqTool::parseFileName(const QString &filename)
 {
-    bool ok;
+    bool   sr_ok;
     qint64 sr;
+    bool   center_ok;
+    qint64 center;
 
     QStringList list = filename.split('_');
 
     if (list.size() < 5)
-        return sample_rate;
+        return;
 
     // gqrx_yymmdd_hhmmss_freq_samprate_fc.raw
-    sr = list.at(4).toLongLong(&ok);
+    sr = list.at(4).toLongLong(&sr_ok);
+    center = list.at(3).toLongLong(&center_ok);
 
-    if (ok)
-        return sr;
-    else
-        return sample_rate;  // return current rate
+    if (sr_ok)
+        sample_rate = sr;
+    if (center_ok)
+        center_freq = center;
 }

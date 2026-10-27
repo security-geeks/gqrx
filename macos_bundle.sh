@@ -1,10 +1,21 @@
 #!/bin/bash -e
 
-GQRX_VERSION=$(<version.txt)
+GQRX_VERSION="$(<build/version.txt)"
 IDENTITY=Y3GC27WZ4S
+
+echo "CONDA_PREFIX: " $CONDA_PREFIX
+
+MACDEPLOYQT6=${CONDA_PREFIX}/bin/macdeployqt6
+echo "macdeployqt6: " ${MACDEPLOYQT6}
+
+# cleanup and setup
+if [ -e Gqrx.app ] ;
+then rm -r Gqrx.app
+fi
 
 mkdir -p Gqrx.app/Contents/MacOS
 mkdir -p Gqrx.app/Contents/Resources
+mkdir -p Gqrx.app/Contents/soapy-modules
 
 /bin/cat <<EOM >Gqrx.app/Contents/Info.plist
 <?xml version="1.0" encoding="UTF-8"?>
@@ -13,8 +24,6 @@ mkdir -p Gqrx.app/Contents/Resources
 <dict>
   <key>NSPrincipalClass</key>
   <string>NSApplication</string>
-  <key>CFBundleGetInfoString</key>
-  <string>Gqrx</string>
   <key>CFBundleExecutable</key>
   <string>gqrx</string>
   <key>CFBundleIdentifier</key>
@@ -37,7 +46,7 @@ mkdir -p Gqrx.app/Contents/Resources
 </plist>
 EOM
 
-/bin/cat <<EOM >Entitlements.plist
+/bin/cat <<EOM >/tmp/Entitlements.plist
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -50,14 +59,19 @@ EOM
 
 cp build/src/gqrx Gqrx.app/Contents/MacOS
 cp resources/icons/gqrx.icns Gqrx.app/Contents/Resources
-cp -r /usr/local/lib/SoapySDR/modules* Gqrx.app/Contents/soapy-modules
-chmod 644 Gqrx.app/Contents/soapy-modules/*
+cp "$CONDA_PREFIX"/lib/SoapySDR/modules*/* Gqrx.app/Contents/soapy-modules
 
-dylibbundler -s /usr/local/opt/icu4c/lib/ -od -b -x Gqrx.app/Contents/MacOS/gqrx -x Gqrx.app/Contents/soapy-modules/libPlutoSDRSupport.so -x Gqrx.app/Contents/soapy-modules/libremoteSupport.so -d Gqrx.app/Contents/libs/
-ln -sf /usr/local/opt/python@3.9/Frameworks/Python.framework /usr/local/opt/python@3.9/lib/Python.framework
-/usr/local/opt/qt@5/bin/macdeployqt Gqrx.app -no-strip -always-overwrite -sign-for-notarization=$IDENTITY
+if [ "$1" = "true" ]; then
+    "${MACDEPLOYQT6}" Gqrx.app -verbose=1 -no-strip -always-overwrite -sign-for-notarization="${IDENTITY}" -libpath=Gqrx.app/Contents/Frameworks
+else
+    "${MACDEPLOYQT6}" Gqrx.app -verbose=1 -no-strip -always-overwrite -libpath=Gqrx.app/Contents/Frameworks
+fi
 
-for f in Gqrx.app/Contents/libs/*.dylib Gqrx.app/Contents/soapy-modules/*.so Gqrx.app/Contents/Frameworks/Python.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python Gqrx.app/Contents/Frameworks/*.framework Gqrx.app/Contents/MacOS/gqrx
+for f in Gqrx.app/Contents/Frameworks/*.dylib Gqrx.app/Contents/soapy-modules/* Gqrx.app/Contents/MacOS/gqrx
 do
-    codesign --force --verify --verbose --timestamp --options runtime --entitlements Entitlements.plist --sign $IDENTITY $f
+    if [ "$1" = "true" ]; then
+        codesign --force --verify --verbose --timestamp --options runtime --entitlements /tmp/Entitlements.plist --sign "${IDENTITY}" "$f"
+    else
+        codesign --remove-signature "$f"
+    fi
 done

@@ -40,7 +40,7 @@ namespace Ui {
     class CIoConfig;
 }
 
-/** @brief Inout/output device configurator. */
+/** @brief Input/output device configurator. */
 class CIoConfig : public QDialog
 {
     Q_OBJECT
@@ -65,6 +65,7 @@ private:
     void updateOutDev();
     int  idx2decim(int idx) const;
     int  decim2idx(int decim) const;
+    static std::string escapeDevstr(std::string devstr);
 
 private:
     Ui::CIoConfig  *ui;

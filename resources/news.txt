@@ -1,5 +1,199 @@
 
-      2.15: In progress...
+    2.17.8: In progress...
+
+     FIXED: Use default FFT plot & waterfall ranges when settings are invalid.
+
+
+    2.17.7: Released May 27, 2025
+
+       NEW: Start/stop I/Q recording via remote control.
+  IMPROVED: Allow multiple simultaneous remote control connections.
+     FIXED: DMG release for ARM-based Macs fails to start.
+     FIXED: Compilation error affecting MSVC.
+
+
+    2.17.6: Released November 29, 2024
+
+       NEW: Fetch RDS Program Service & RadioText via remote control.
+       NEW: Set and query audio mute via remote control.
+       NEW: DMG release for ARM-based Macs.
+  IMPROVED: Save I/Q recording format to settings.
+  IMPROVED: Reduced CPU utilization of plot and waterfall display.
+  IMPROVED: Display and formatting of RDS data.
+     FIXED: Decoding of RDS flags.
+     FIXED: Incorrect channel filter offset, for some devices.
+   CHANGED: x86 DMG release requires macOS 13.7 or later.
+
+
+    2.17.5: Released April 18, 2024
+
+       NEW: PlutoSDR and LimeSDR support in AppImage release, via SoapySDR.
+       NEW: Airspy support in Windows binary release.
+  IMPROVED: Updated GNU Radio, SDR driver, and Qt versions in AppImage release.
+     FIXED: Respond correctly to pipelined remote control commands.
+     FIXED: Limit UDP packet size to 1024, for compatibility with netcat.
+   REMOVED: FreeSRP support in AppImage release.
+
+
+    2.17.4: Released February 9, 2024
+
+       NEW: Experimental Windows binary release (RTL-SDR only).
+  IMPROVED: Respond to \chk_vfo remote command (needed by some clients).
+  IMPROVED: Respond to \get_powerstat remote command (needed by some clients).
+
+
+    2.17.3: Released October 20, 2023
+
+     FIXED: Delete key shortcut for bookmark removal.
+
+
+    2.17.2: Released October 9, 2023
+
+       NEW: FORCE_QT6 and FORCE_QT5 CMake options to force Qt version.
+
+
+    2.17.1: Released October 9, 2023
+
+       NEW: Delete key clears the waterfall.
+       NEW: I/Q tool can save recordings in SigMF format.
+       NEW: Holding Ctrl speeds up mouse wheel zoom.
+  IMPROVED: Reduced CPU utilization of waterfall display.
+   CHANGED: DMG release requires macOS 12.7 or later.
+
+
+      2.17: Released October 1, 2023
+
+       NEW: "Avg" plot mode, which displays average of FFT bins.
+       NEW: "Fill" plot mode, which displays both maximum & average of FFT bins.
+       NEW: "Histogram" plot mode, which displays distribution of FFT bins.
+       NEW: Selectable plot scaling: dBFS, dBV/RBW, dbV/√Hz, dBm/RBW, dBm/Hz.
+       NEW: Min hold line in plot.
+       NEW: A/B measurement markers on plot.
+       NEW: Plot tooltip displays delta from demod frequency.
+       NEW: Dropped frames are indicated by red background in FFT Settings panel.
+       NEW: "Avg" waterfall mode, which displays average of FFT bins.
+       NEW: "Sync" waterfall mode, which mirrors averaged data from plot.
+       NEW: Support for RTL-SDR Blog V4 in AppImage and DMG releases.
+       NEW: Save FFT plot center frequency in settings.
+  IMPROVED: Peak detection algorithm.
+  IMPROVED: Peak detection uses peak hold data when available.
+  IMPROVED: Maximum FFT size increased to 4M.
+  IMPROVED: Maximum frame rate increased to 500.
+  IMPROVED: Averaging slider is consistent across frame rates.
+  IMPROVED: Visibility of text in axes.
+  IMPROVED: Full support for high-DPI screens in plot & waterfall.
+  IMPROVED: Plot & waterfall performance.
+  IMPROVED: Plot can be zoomed & resized while DSP is stopped.
+  IMPROVED: FFT window setting is stored as a string.
+  IMPROVED: Waterfall span setting is stored in milliseconds.
+  IMPROVED: Added 6 dB attenuation to WAV file recordings to prevent clipping.
+  IMPROVED: Use logarithmic scale for frequency zoom slider.
+  IMPROVED: Reduced CPU utilization of demodulators.
+  IMPROVED: Properly handle smooth scrolling.
+  IMPROVED: Shorten band names to fit in narrow spaces.
+  IMPROVED: Delay plot & waterfall drawing until samples arrive from hardware.
+   CHANGED: Frequency zoom slider zooms around center of display.
+   CHANGED: Disallow scrolling beyond the FFT frequency limits.
+   CHANGED: Default narrow FM deviation increased to 5 kHz.
+     FIXED: Time on waterfall is calculated correctly.
+     FIXED: Frequency is correctly rounded in I/Q filenames.
+     FIXED: Crash in AFSK1200 decoder.
+     FIXED: Hang when setting a very narrow filter width.
+     FIXED: Inconsistent 1-2-5 scaling of amplitude axis.
+   REMOVED: "Save waterfall" feature.
+
+
+      2.16: Released April 28, 2023
+
+       NEW: Restore AM & AM-Sync settings between sessions.
+       NEW: Set/get audio gain via remote control.
+       NEW: Only show bookmarks for active tag groups in the panadapter.
+     FIXED: Loading of narrow FM tau setting.
+     FIXED: Crash when adding or removing bookmark tags.
+     FIXED: Redraw bookmarks immediately after changes.
+     FIXED: DX cluster spots fail to expire around midnight.
+     FIXED: AGC sensitivity bug introduced in version 2.15.10.
+  IMPROVED: Rendering of frequency control and S-meter on some high-DPI screens.
+   REMOVED: Support for GNU Radio 3.7.
+
+
+   2.15.10: Released April 13, 2023
+
+       NEW: Restore FFT zoom level between sessions.
+       NEW: Restore peak detect & peak hold between sessions.
+       NEW: "Z" keyboard shortcut sets frequency offset to zero.
+     FIXED: Remove empty frame from bottom of I/Q tool window.
+     FIXED: Sudden scrolling of file list in I/Q tool window.
+     FIXED: Reset zoom slider after right click on panadapter / waterfall.
+     FIXED: Aliasing when input rate is higher than 2 Msps.
+  IMPROVED: AGC performance.
+  IMPROVED: WFM stereo & OIRT performance.
+  IMPROVED: I/Q swap performance.
+  IMPROVED: Apply amplitude normalization to FFT window functions.
+
+
+    2.15.9: Released April 9, 2022
+
+       NEW: Qt 6 support.
+     FIXED: Slider widgets don't work correctly on MacOS Monterey.
+
+
+    2.15.8: Released January 25, 2022
+
+     FIXED: Crash when DSP is restarted after a long pause.
+     FIXED: Remove usage of deprecated Qt APIs.
+     FIXED: Return correct RDS status in remote control.
+  IMPROVED: Allow ordinary IP addresses to be used in remote control settings.
+
+
+    2.15.7: Released January 23, 2022
+
+     FIXED: Errors & warnings in appstream metadata & desktop entry.
+
+
+    2.15.6: Released January 22, 2022
+
+  IMPROVED: Install icon, desktop entry, and appstream metadata.
+
+
+    2.15.5: Released January 20, 2022
+
+     FIXED: Use correct categories in desktop entry file.
+
+
+    2.15.4: Released January 15, 2022
+
+     FIXED: Audio is delayed when FFT size is changed.
+
+
+    2.15.3: Released January 15, 2022
+
+     FIXED: RDS receiver skips some messages.
+     FIXED: Buffer overruns in AFSK1200 decoder.
+     FIXED: Crash when opening APSK1200 decoder with demod off.
+  IMPROVED: FFT and S-meter performance.
+  IMPROVED: Reduced FFT memory usage.
+  IMPROVED: Increased S-meter resolution to 0.1 dB.
+  IMPROVED: Accuracy of S-meter display.
+
+
+    2.15.2: Released January 8, 2022
+
+       NEW: Save & restore center frequency when playing I/Q files.
+     FIXED: Device selection fails for some SoapySDR devices.
+     FIXED: Segfault when starting AppImage on some systems.
+     FIXED: Crash/freeze after stopping audio recorder or AFSK1200 decoder.
+  IMPROVED: Frequency accuracy of plots at high zoom levels.
+
+
+    2.15.1: Released December 18, 2021
+
+     FIXED: DSP stops when device is changed.
+     FIXED: USB error when device settings are changed.
+     FIXED: Changing frequency using the keyboard doesn't work on MacOS.
+
+
+      2.15: Released December 15, 2021
 
        NEW: Start/stop RDS and fetch Program Identification via remote control.
        NEW: Added IQ balancing to MacOS release.
@@ -203,7 +397,7 @@
   IMPROVED: Show configuration file path when listing config files using -l
   IMPROVED: Microtelecom Perseus integration.
   IMPROVED: Implemented PPM correction for RF Space Cloud IQ (gr-osmosdr-gqrx)
-  IMPORVED: Implemented PPM correction for PlutoSDR (gr-osmosdr-gqrx)
+  IMPROVED: Implemented PPM correction for PlutoSDR (gr-osmosdr-gqrx)
 
 
       2.10: Released January 21, 2018
@@ -289,7 +483,8 @@
   IMPROVED: Set default audio FFT range to -70...0 dB.
   IMPROVED: Restore audio FFT dB scaling between sessions.
 
-     2.5.3: Released February 3, 2016.
+
+     2.5.3: Released February 3, 2016
 
        NEW: Set and read squelch via remote control socket.
      FIXED: Toolbar appearance on Mac OS X.
@@ -298,14 +493,16 @@
   IMPROVED: Respond to \dump_state remote command (needed by some clients).
   IMPROVED: Read remote frequency as double for rigctl compatibility.
 
-     2.5.2: Released January 21, 2016.
+
+     2.5.2: Released January 21, 2016
 
        NEW: Support for Red Pitaya (RX only).
        NEW: Build with GNU Radio 3.7.9.
   IMPROVED: Increased spacing between frequency divisions to prevent overlap.
   IMPROVED: Reduced minimum window size requirement to around 800x600 pixels.
 
-       2.5  Released January 7, 2016
+
+       2.5: Released January 7, 2016
 
        NEW: Read out signal time and on the waterfall (disabled on OS X).
        NEW: Save waterfall to graphics file.
@@ -319,7 +516,7 @@
   IMPROVED: Button layouts (mostly on Mac OS X).
 
 
-       2.4  Released December 14, 2015
+       2.4: Released December 14, 2015
 
        NEW: Bookmarks.
        NEW: FM RDS decoder using gr-rds.
@@ -346,18 +543,18 @@
   IMPROVED: Robustness against malformed remote control commands.
 
 
-     2.3.2  Released November 28, 2014
+     2.3.2: Released November 28, 2014
 
      FIXED: Pandapter and waterfall widths are limited to 4096 pixels.
   IMPROVED: Add 2.5 Msps preset for Airspy.
 
 
-     2.3.1  Released August 8, 2014
+     2.3.1: Released August 8, 2014
 
      FIXED: Use correct categories in .desktop file.
 
 
-     2.3.0  Released August 5, 2014
+     2.3.0: Released August 5, 2014
 
        NEW: Support for setting analog bandwidth.
        NEW: Support for setting gain stages individually.
@@ -391,7 +588,7 @@
   IMPROVED: Make release news available through the Help menu.
 
 
-     2.2.0  Released August 8, 2013
+     2.2.0: Released August 8, 2013
 
        NEW: Official Ubuntu PPA and Mac OS X app bundle.
        NEW: Allow using audio output devices other than the default.
@@ -415,12 +612,12 @@
   IMPROVED: Audio gain setting no longer has impact on WAV recording.
 
 
-   2.1.251  Released on March 1, 2013
+   2.1.251: Released March 1, 2013
 
      FIXED: Incorrect device selection in config dialog.
 
 
-   2.1.246  Released on February 29, 2013
+   2.1.246: Released February 29, 2013
 
        NEW: I/Q swapping option.
        NEW: FFT video filter with non-linear gain (still WIP).
@@ -445,7 +642,7 @@
   IMPROVED: I/Q DC canceling.
 
 
-   2.1.148  Released on December 9, 2012
+   2.1.148: Released December 9, 2012
 
        NEW: Support for USRP and RTL2832U (rtlsdr) devices.
        NEW: Pan & zoom on the pandapter axes.
@@ -454,11 +651,11 @@
   IMPROVED: Various improvements to the user interface.
 
 
-     2.0.0  Released on July 7, 2012
+     2.0.0: Released July 7, 2012
 
        First stable release of C++ version with Funcube Dongle support.
 
 
-     1.x
+     1.x:
 
        Initial experiments using Python and gr-qtgui.
